@@ -8,6 +8,19 @@ we're doing together.
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/SparseExtra>
+#include <Eigen/Eigenvalues> 
+
+// Function to print the adjacency matrix (dense format)
+void print_adjacency_matrix(const Eigen::SparseMatrix<double>& mat) {
+    Eigen::MatrixXd dense = Eigen::MatrixXd(mat);
+    std::cout << "Adjacency Matrix:" << std::endl;
+    for (int i = 0; i < dense.rows(); ++i) {
+        for (int j = 0; j < dense.cols(); ++j) {
+            std::cout << dense(i, j) << " ";
+        }
+        std::cout << std::endl;
+    }
+}
 
 using namespace std;
 using namespace Eigen;
@@ -67,8 +80,12 @@ int main(int argc, char** argv){
 
     SpMat Ag = build_adjacency_matrix(graph_1);
 
+    print_adjacency_matrix(Ag);
+    cout << "\n\n" << endl;
+
     // ====================================== REQUEST 1 ======================================
 
+    
     cout << "Adjacency matrix size: " << Ag.rows() << "x" << Ag.cols() << endl;
     cout << "Nonzero entries: " << Ag.nonZeros() << endl;
     cout << "Frobenius norm: " << Ag.norm() << endl;
@@ -88,7 +105,52 @@ int main(int argc, char** argv){
     Eigen::SimplicialLLT<SparseMatrix<double>> chol(Lg);
     cout << "Lg is SPD?: " << (chol.info() == Success ? "Yes" : "No") << endl; // Lg is for sure symmetric, no need to check on that 
 
+    // ====================================== REQUEST 3 ======================================
+    Eigen::SelfAdjointEigenSolver<SpMat> eigensolver(Lg);
+    if (eigensolver.info() == Success) {
+        VectorXd evals = eigensolver.eigenvalues();
+        MatrixXd evecs = eigensolver.eigenvectors();
+        for (int i = 0; i < evals.size(); ++i) {
+            if (std::abs(evals[i]) < 1.0e-15) { // clamping to zero the very small eigenvalues
+                evals[i] = 0.0;
+            }
+        }
 
+        cout << "\nMinimum eigenvalue is: " << evals.minCoeff() << endl;
+        cout << "Maximum eigenvalue is: " << evals.maxCoeff() << "\n" << endl;
 
+    // ====================================== REQUEST 4 ======================================
+        double second_smallest = std::numeric_limits<double>::max();
+        int index = -1;
+        for (int i = 0; i < evals.size(); ++i) {
+            if (evals[i] > 0 && evals[i] < second_smallest) { 
+                second_smallest = evals[i];
+                index = i;
+            }
+        }
+        if(index != -1){
+            cout << "The second smallest eigenvalue is: " << second_smallest << endl;
+            cout << "Its corresponding eigenvector is: \n" << evecs.col(index) << endl;
 
+            // Identifying the clusters by looking at the signs of the components of the eigenvector
+            cout << "The clusters are: " << endl;
+            cout << "Cluster 1 (positive components): ";
+            for (int i = 0; i < evecs.rows(); ++i)
+                if (evecs(i, index) > 0)
+                    cout << (i + 1) << " "; // +1 to match the node numbering
+            cout << endl;
+            cout << "Cluster 2 (negative components): ";
+            for (int i = 0; i < evecs.rows(); ++i)
+                if (evecs(i, index) < 0)
+                    cout << (i + 1) << " "; // +1 to match the node numbering
+            cout << endl;
+        }else{
+            cout << "There is no second smallest eigenvalue!" << endl;
+        }
+    }else{
+        cerr << "Eigenvalue decomposition failed!" << endl;
+    }
+    
+
+    return 0;
 }
