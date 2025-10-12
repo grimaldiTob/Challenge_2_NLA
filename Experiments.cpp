@@ -55,9 +55,18 @@ SparseMatrix<double> build_adjacency_matrix(const vector<MyTuple> & arr){
     return mat;
 }
 
+// used for debugging 
+void print_vector(const VectorXd &v) {
+    cout << "[ ";
+    for(int i = 0; i < v.size(); i++) {
+        cout << " "<< v.coeff(i) << " ";
+    }
+    cout << " ]" << endl;
+}
+
 int main(int argc, char** argv){
     using SpMat = Eigen::SparseMatrix<double>;
-    using SpVec = Eigen::VectorXd;
+    using SpVec = Eigen::VectorXd; // should change the name because is defined a dense vector
     
     /*if(argc < 2){
         cerr << "Wrong command format!\n" << endl:
@@ -97,8 +106,12 @@ int main(int argc, char** argv){
     // multiplying Ag for a vector of ones gives us the sum over the rows...guess we also need vector vg for later. 
     SpMat Dg = vg.asDiagonal().toDenseMatrix().sparseView();
     SpMat Lg = Dg - Ag;
-    SpVec yg = Lg * vg;
-    
+    // SpVec yg = Lg * vg; - The assignment specifies multiplying by a vector of ones
+    SpVec yg = Lg * ones; // return a zeros vector 
+
+    cout << "yg = ";
+    print_vector(yg);
+
     cout << "Norm of vector y is: " << yg.norm() << endl;
 
     // code copied from last challenge (check for SPD)
@@ -150,7 +163,31 @@ int main(int argc, char** argv){
     }else{
         cerr << "Eigenvalue decomposition failed!" << endl;
     }
-    
 
+    // =================================== REQUEST 5 ============================================
+
+    SpMat As;
+
+    loadMarket(As, "social.mtx");
+
+    cout << "As: Adjacency matrix size =  " << As.rows() << "x" << As.cols() << endl;
+    cout << "As: Nonzero entries =  " << As.nonZeros() << endl;
+    cout << "As: Frobenius norm = " << As.norm() << endl;
+
+    // ================================== REQUEST 6 =============================================
+
+
+    ones = SpVec::Ones(As.cols());
+    SpVec vs = As * ones; 
+    SpMat Ds = vs.asDiagonal().toDenseMatrix().sparseView();
+    SpMat Ls = Ds - As;
+    SpVec ys = Ls * ones;  
+
+    cout << "Norm of vector ys is: " << ys.norm() << endl;
+
+    SimplicialLLT<SparseMatrix<double>> chols(Ls);
+    cout << "Ls is SPD?: " << (chols.info() == Success ? "Yes" : "No") << endl;  
+    cout << "Ls Nonzeros entries = " << Ls.nonZeros() << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
+    
     return 0;
 }
