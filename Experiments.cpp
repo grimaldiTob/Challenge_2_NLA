@@ -15,7 +15,7 @@ using namespace std;
 using namespace Eigen;
 using MyTuple = tuple<int, int>; // define tuple type that will be used in order to store matrices...
 
-// Function to print the adjacency matrix (dense format)
+// Function to print the adjacency matrix (dense format) USED FOR DEBUGGING
 void print_adjacency_matrix(const Eigen::SparseMatrix<double>& mat) {
     Eigen::MatrixXd dense = Eigen::MatrixXd(mat);
     std::cout << "Adjacency Matrix:" << std::endl;
@@ -26,6 +26,7 @@ void print_adjacency_matrix(const Eigen::SparseMatrix<double>& mat) {
         std::cout << std::endl;
     }
 }
+
 /* Function that creates an adjacency matrix from any array of tuples that is passed to it.
     The function uses Triplets in order to store the unitary values correctly in a SparseMatrix.
     
@@ -97,7 +98,7 @@ int main(int argc, char** argv){
     
     cout << "Adjacency matrix size: " << Ag.rows() << "x" << Ag.cols() << endl;
     cout << "Nonzero entries: " << Ag.nonZeros() << endl;
-    cout << "Frobenius norm: " << Ag.norm() << endl;
+    cout << "Frobenius norm: " << Ag.norm() << endl; //TODO: Ag.norm() is actually the Froebenius norm?
 
     // ====================================== REQUEST 2 ======================================
 
@@ -160,16 +161,16 @@ int main(int argc, char** argv){
         }else{
             cout << "There is no second smallest eigenvalue!" << endl;
         }
-        }else{
-            cerr << "Eigenvalue decomposition failed!" << endl;
-        }
+    }else{
+        cerr << "Eigenvalue decomposition failed!" << endl;
+    }
 
     // =================================== REQUEST 5 ============================================
 
     SpMat As;
 
     loadMarket(As, "social.mtx");
-
+    cout << "\n\n\n Matrix As: \n" << endl;
     cout << "As: Adjacency matrix size =  " << As.rows() << "x" << As.cols() << endl;
     cout << "As: Nonzero entries =  " << As.nonZeros() << endl;
     cout << "As: Frobenius norm = " << As.norm() << endl;
@@ -187,7 +188,11 @@ int main(int argc, char** argv){
 
     SimplicialLLT<SparseMatrix<double>> chols(Ls);
     cout << "Ls is SPD?: " << (chols.info() == Success ? "Yes" : "No") << endl;  
+    cout << "Ls is symmetric?: " << (Ls.isApprox(Ls.transpose()) ? "Yes" : "No") << endl;
     cout << "Ls Nonzeros entries = " << Ls.nonZeros() << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
     
+    // ================================== REQUEST 7 =============================================
+    Ls.coeffRef(0, 0) += 0.2; // modifies the (0,0) element according to requests 
+    saveMarket(Ls, "Ls_perturbed.mtx");
     return 0;
 }
