@@ -10,6 +10,10 @@ we're doing together.
 #include <unsupported/Eigen/SparseExtra>
 #include <Eigen/Eigenvalues> 
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 using namespace std;
 using namespace Eigen;
@@ -183,11 +187,34 @@ int main(int argc, char** argv){
     SpMat Ls = Ds - As;
     SpVec ys = Ls * ones;  
 
+    // I need this for later
+    int r = Ls.rows(); 
+    int c = Ls.cols();
+    int nnz = Ls.nonZeros();
+
     cout << "Norm of vector ys is: " << ys.norm() << endl;
 
     SimplicialLLT<SparseMatrix<double>> chols(Ls);
     cout << "Ls is SPD?: " << (chols.info() == Success ? "Yes" : "No") << endl;  
-    cout << "Ls Nonzeros entries = " << Ls.nonZeros() << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
+    cout << "Ls Nonzeros entries = " << nnz << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
+
+    // ================================== REQUEST 7 =============================================
+
+    Ls.coeffRef(0, 0) += 0.2; // add the perturbation
+    
+    // saving routine, same code as the first challenge
+    FILE* outLs = fopen("Ls.mtx", "w");
+    fprintf(outLs,"%%%%MatrixMarket matrix coordinate real general\n");
+    fprintf(outLs,"%d %d %d\n", r, c, nnz);
+    for (int k=0; k<Ls.outerSize(); ++k)
+    {
+        for (SpMat::InnerIterator it(Ls, k); it; ++it)
+        {
+            fprintf(outLs, "%d %d %f\n", static_cast<int>(it.row()) + 1, static_cast<int>(it.col()) + 1, it.value()); 
+        }
+    }
+    fclose(outLs);
+    // check README.md for LIS output.
     
     return 0;
 }
