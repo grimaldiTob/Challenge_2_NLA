@@ -10,6 +10,11 @@ we're doing together.
 #include <unsupported/Eigen/SparseExtra>
 #include <Eigen/Eigenvalues> 
 
+
+using namespace std;
+using namespace Eigen;
+using MyTuple = tuple<int, int>; // define tuple type that will be used in order to store matrices...
+
 // Function to print the adjacency matrix (dense format)
 void print_adjacency_matrix(const Eigen::SparseMatrix<double>& mat) {
     Eigen::MatrixXd dense = Eigen::MatrixXd(mat);
@@ -21,11 +26,6 @@ void print_adjacency_matrix(const Eigen::SparseMatrix<double>& mat) {
         std::cout << std::endl;
     }
 }
-
-using namespace std;
-using namespace Eigen;
-using MyTuple = tuple<int, int>; // define tuple type that will be used in order to store matrices...
-
 /* Function that creates an adjacency matrix from any array of tuples that is passed to it.
     The function uses Triplets in order to store the unitary values correctly in a SparseMatrix.
     
@@ -121,8 +121,8 @@ int main(int argc, char** argv){
     // ====================================== REQUEST 3 ======================================
     Eigen::SelfAdjointEigenSolver<SpMat> eigensolver(Lg);
     if (eigensolver.info() == Success) {
-        VectorXd evals = eigensolver.eigenvalues();
-        MatrixXd evecs = eigensolver.eigenvectors();
+        VectorXd evals = eigensolver.eigenvalues(); // vector of eigenvalues
+        MatrixXd evecs = eigensolver.eigenvectors(); // matrix with the eigenvectors as columns
         for (int i = 0; i < evals.size(); ++i) {
             if (std::abs(evals[i]) < 1.0e-15) { // clamping to zero the very small eigenvalues
                 evals[i] = 0.0;
@@ -133,7 +133,7 @@ int main(int argc, char** argv){
         cout << "Maximum eigenvalue is: " << evals.maxCoeff() << "\n" << endl;
 
     // ====================================== REQUEST 4 ======================================
-        double second_smallest = std::numeric_limits<double>::max();
+        double second_smallest = std::numeric_limits<double>::max(); // set a variable to infinity as a reference
         int index = -1;
         for (int i = 0; i < evals.size(); ++i) {
             if (evals[i] > 0 && evals[i] < second_smallest) { 
@@ -148,7 +148,7 @@ int main(int argc, char** argv){
             // Identifying the clusters by looking at the signs of the components of the eigenvector
             cout << "The clusters are: " << endl;
             cout << "Cluster 1 (positive components): ";
-            for (int i = 0; i < evecs.rows(); ++i)
+            for (int i = 0; i < evecs.rows(); ++i) // iterate over the the index column
                 if (evecs(i, index) > 0)
                     cout << (i + 1) << " "; // +1 to match the node numbering
             cout << endl;
@@ -160,9 +160,9 @@ int main(int argc, char** argv){
         }else{
             cout << "There is no second smallest eigenvalue!" << endl;
         }
-    }else{
-        cerr << "Eigenvalue decomposition failed!" << endl;
-    }
+        }else{
+            cerr << "Eigenvalue decomposition failed!" << endl;
+        }
 
     // =================================== REQUEST 5 ============================================
 
@@ -176,7 +176,7 @@ int main(int argc, char** argv){
 
     // ================================== REQUEST 6 =============================================
 
-
+    // same routine applied in Request 2 but this time on a new adjacency matrix
     ones = SpVec::Ones(As.cols());
     SpVec vs = As * ones; 
     SpMat Ds = vs.asDiagonal().toDenseMatrix().sparseView();
