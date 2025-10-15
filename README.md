@@ -75,7 +75,7 @@ Power: relative residual    = 9.972897e-09
 This command runs the LIS script and finds the second smallest (positive) eigenvalue of Ls matrix with a 1.e-10 tolerance.
 
 ```
-mpirun -n 4 ./eigen1 Ls_perturbed_cp.mtx eigvec.txt hist.txt -e si -ss 2 -etol 1e-10
+mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e si -ss 2 -etol 1e-10
 ```
 
 with the following result: 
