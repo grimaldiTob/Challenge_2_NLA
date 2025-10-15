@@ -3,7 +3,7 @@
 
 Actually with the last request they ask us to comment results so I guess we should write a complete README.md file in order to complete the challenge.
 
-# Point 7
+## Point 7
 
 After adding the small perturbation to the value in position (1, 1) and saving the matrix in Matrix Market format, we run the LIS script that computes the biggest eigenvalue of a matrix with a given tolerance. After compiling the source code with the following command.
 ```
@@ -39,7 +39,36 @@ Power: relative residual    = 9.940435e-09
 Computed biggest eigenvalue of Ls.mtx: `6.013370e+01`
 Number of iterations for the method: `2007`
 
+## Point 8
+A shift can be added when invoking the previous solver in order to speed up the convergence: 
+```
+mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e pi -etol 1e-08 -emaxiter 10000 -shift 29.55
+```
+whose output is: 
+```
+number of processes = 4
+matrix size = 351 x 351 (9153 nonzero entries)
 
+initial vector x      : all components set to 1
+precision             : double
+eigensolver           : Power
+convergence condition : ||lx-(B^-1)Ax||_2 <= 1.0e-08 * ||lx||_2
+matrix storage format : CSR
+shift                 : 2.955000e+01
+eigensolver status    : normal end
+
+Power: mode number          = 0
+Power: eigenvalue           = 6.013370e+01
+Power: number of iterations = 1063
+Power: elapsed time         = 1.176979e-02 sec.
+Power:   preconditioner     = 0.000000e+00 sec.
+Power:     matrix creation  = 0.000000e+00 sec.
+Power:   linear solver      = 0.000000e+00 sec.
+Power: relative residual    = 9.972897e-09
+
+```
+
+[NB: I tried various shifts, 29.55 seems to be the best in term of reducing the number of iterations without affecting too much the relative residual (and without causing a change in the computed eigenvalue!).]
 
 
 
