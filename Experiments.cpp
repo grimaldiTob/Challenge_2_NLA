@@ -110,7 +110,9 @@ int main(int argc, char** argv){
     SpVec vg = Ag * ones; // Eigen has a method to compute the sum of the elements in a row but just in a Dense Matrix.
     // multiplying Ag for a vector of ones gives us the sum over the rows...guess we also need vector vg for later. 
     SpMat Dg = vg.asDiagonal().toDenseMatrix().sparseView();
+    
     SpMat Lg = Dg - Ag;
+    print_adjacency_matrix(Lg);
     // SpVec yg = Lg * vg; - The assignment specifies multiplying by a vector of ones
     SpVec yg = Lg * ones; // return a zeros vector 
 
@@ -174,10 +176,10 @@ int main(int argc, char** argv){
     SpMat As;
 
     loadMarket(As, "social.mtx");
-    cout << "\n\n\n Matrix As: \n" << endl;
-    cout << "As: Adjacency matrix size =  " << As.rows() << "x" << As.cols() << endl;
-    cout << "As: Nonzero entries =  " << As.nonZeros() << endl;
-    cout << "As: Frobenius norm = " << As.norm() << endl;
+    cout << "\nMatrix As: " << endl;
+    cout << "\tAs: Adjacency matrix size =  " << As.rows() << "x" << As.cols() << endl;
+    cout << "\tAs: Nonzero entries =  " << As.nonZeros() << endl;
+    cout << "\tAs: Frobenius norm = " << As.norm() << endl;
 
     // ================================== REQUEST 6 =============================================
 
@@ -186,7 +188,7 @@ int main(int argc, char** argv){
     SpVec vs = As * ones; 
     SpMat Ds = vs.asDiagonal().toDenseMatrix().sparseView();
     SpMat Ls = Ds - As;
-    SpVec ys = Ls * ones;  
+    SpVec ys = Ls * ones;
 
     // I need this for later
     int r = Ls.rows(); 

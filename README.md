@@ -3,6 +3,70 @@
 
 Actually with the last request they ask us to comment results so I guess we should write a complete README.md file in order to complete the challenge.
 
+## Point 1
+
+Ag is the adjacency matrix of the graph shown in the Challenge paper. The function `build_adjacency_matrix` builds a Sparse Matrix from a vector of Tuples passed as an argument. 
+
+The Frobenius norm of the matrix Ag is: `4.69042`
+
+## Point 2
+
+After building the Dg and Lg matrix as requested we perform the matrix vector multiplication such that 
+```
+y = Lg * x
+```
+The Euclidean norm of y: `0`
+
+This result is obvious as we are actually taking the sum of all the terms that are on the same row in Lg, which is the Laplacian.
+
+Lg is SPD as we get it from the sum of two symmetrix matrices (`Dg - Ag`)
+
+## Point 3
+
+Third point asks to compute the biggest and smallest eigenvalue of Lg using the `SelfAdjointEigenSolver` from Eigen.
+
+Minimum eigenvalue of Lg is: 0
+Maximum eigenvalue of Lg is: 5.09259
+
+## Point 4
+
+As it is said in the Challenge paper Lg is a graph Laplacian which has the smallest eigenvalue equal to zero.
+
+The second smallest eigenvalue is called the Fiedler value. Its corresponding eigenvector carries informations about how the graph is clustered. In particular the Fiedler vector associated to the Fiedler value is the following:
+
+```
+Fiedler vector vector: 
+-0.440128
+-0.385007
+-0.233451
+-0.385007
+ 0.128136
+ 0.273771
+ 0.350833
+  0.37886
+ 0.311992
+```
+We can identify two clusters by looking at the sign of the entries of the previous vector.
+```
+The clusters are: 
+Cluster 1 (positive components): 5 6 7 8 9 
+Cluster 2 (negative components): 1 2 3 4 
+```
+This is the result expected because looking at the graph's scheme in the Challenge's paper we clearly recognize two blocks of nodes.
+
+## Point 5
+
+Pretty straight forward point here, you just load the matrix as we always did and report the Frobenius norm here.
+
+Frobenius norm of the matrix: `93.819`
+
+## Point 6
+
+Just repeat the procedure we used for point 2 to obtain the graph Laplacian of the matrix As. In this case the reported output is the following:
+
+Ls is SPD?: No
+Ls Nonzeros entries = 9153
+
 ## Point 7
 
 After adding the small perturbation to the value in position (1, 1) and saving the matrix in Matrix Market format, we run the LIS script that computes the biggest eigenvalue of a matrix with a given tolerance. After compiling the source code with the following command.
@@ -70,6 +134,37 @@ Power: relative residual    = 9.972897e-09
 
 [NB: I tried various shifts, 29.55 seems to be the best in term of reducing the number of iterations without affecting too much the relative residual (and without causing a change in the computed eigenvalue!).]
 
+Ok it could be me but I guess using the shift meant that you applied the inverse power method. I made the same tests taking 6.01 as a shift, which makes sense because it shifts the maximum eigenvalue closer to zero, and applying the inverse power method is less expensive. 
+Btw this is the command I used:
+```
+mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e ii -etol 1e-08 -emaxiter 10000 -shift 6.01
+```
+And the result was like this:
+```
+number of processes = 4
+matrix size = 351 x 351 (9153 nonzero entries)
+
+initial vector x      : all components set to 1
+precision             : double
+eigensolver           : Inverse
+convergence condition : ||lx-(B^-1)Ax||_2 <= 1.0e-08 * ||lx||_2
+matrix storage format : CSR
+shift                 : 6.010000e+00
+linear solver         : BiCG
+preconditioner        : none
+eigensolver status    : normal end
+
+Inverse: mode number          = 0
+Inverse: eigenvalue           = 6.011940e+00
+Inverse: number of iterations = 7
+Inverse: elapsed time         = 2.579194e-02 sec.
+Inverse:   preconditioner     = 2.639620e-04 sec.
+Inverse:     matrix creation  = 2.000000e-07 sec.
+Inverse:   linear solver      = 2.540852e-02 sec.
+Inverse: relative residual    = 5.457944e-10
+```
+Which is still worse because of course we are using the inverse power method (it requires to solve a linear system). Number of iterations is good but that's because of the method we used. I tried other LIS scripts and this one seems the best. I guess if we are giving a mu as answer this seems fair.
+
 ## Point 9
 
 This command runs the LIS script and finds the second smallest (positive) eigenvalue of Ls matrix with a 1.e-10 tolerance.
@@ -77,9 +172,7 @@ This command runs the LIS script and finds the second smallest (positive) eigenv
 ```
 mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e si -ss 2 -etol 1e-10
 ```
-
-with the following result: 
-
+with the following result:
 ```
 number of processes = 4
 matrix size = 351 x 351 (9153 nonzero entries)
@@ -119,10 +212,8 @@ Subspace:   preconditioner     = 1.465300e-05 sec.
 Subspace:     matrix creation  = 8.700000e-08 sec.
 Subspace:   linear solver      = 2.006257e-03 sec.
 Subspace: relative residual    = 4.512717e-12
-
 ```
-
-The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** 
+The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** (113 iterations where???)
 
 
 
