@@ -70,5 +70,60 @@ Power: relative residual    = 9.972897e-09
 
 [NB: I tried various shifts, 29.55 seems to be the best in term of reducing the number of iterations without affecting too much the relative residual (and without causing a change in the computed eigenvalue!).]
 
+## Point 9
+
+This command runs the LIS script and finds the second smallest (positive) eigenvalue of Ls matrix with a 1.e-10 tolerance.
+
+```
+mpirun -n 4 ./eigen1 Ls_perturbed_cp.mtx eigvec.txt hist.txt -e si -ss 2 -etol 1e-10
+```
+
+with the following result: 
+
+```
+number of processes = 4
+matrix size = 351 x 351 (9153 nonzero entries)
+
+initial vector x      : all components set to 1
+precision             : double
+eigensolver           : Subspace
+convergence condition : ||lx-(B^-1)Ax||_2 <= 1.0e-10 * ||lx||_2
+matrix storage format : CSR
+shift                 : 0.000000e+00
+inner eigensolver     : Inverse
+linear solver         : BiCG
+preconditioner        : none
+size of subspace      : 2
+
+compute eigenpairs in subspace:
+
+Subspace: mode number          = 0
+Subspace: eigenvalue           = 5.669404e-04
+Subspace: elapsed time         = 2.074572e-03 sec.
+Subspace: number of iterations = 3
+Subspace: relative residual    = 4.512717e-12
+
+Subspace: mode number          = 1
+Subspace: eigenvalue           = 1.789070e+00
+Subspace: elapsed time         = 2.323120e-02 sec.
+Subspace: number of iterations = 113
+Subspace: relative residual    = 8.965722e-11
+
+eigensolver status    : normal end
+
+Subspace: mode number          = 0
+Subspace: eigenvalue           = 5.669404e-04
+Subspace: number of iterations = 3
+Subspace: elapsed time         = 2.541831e-02 sec.
+Subspace:   preconditioner     = 1.465300e-05 sec.
+Subspace:     matrix creation  = 8.700000e-08 sec.
+Subspace:   linear solver      = 2.006257e-03 sec.
+Subspace: relative residual    = 4.512717e-12
+
+```
+
+The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** 
+
+
 
 
