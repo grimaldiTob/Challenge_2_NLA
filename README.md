@@ -1,14 +1,20 @@
 # Challenge_2_NLA
 2nd NLA Challenge Polimi
 
-## Request 7
-In order to make the graph laplacian matrix invertible, add a small perturbation to the first diagonal entry of $L_s$ , namely $L_s (1, 1) = L_s (1, 1) + 0.2$. Export Ls in the *.mtx* format and move it to the `lis-2.1.10/test` folder. Using the proper iterative solver available in the LIS library compute the largest eigenvalue of Ls up to a tolerance of $10^{−8}$. Report the computed eigenvalue and the iterations counts.
+Actually with the last request they ask us to comment results so I guess we should write a complete README.md file in order to complete the challenge.
 
-Since the largest eigenvalue is requested, it is possible to apply the power method. This can be achieve by the LIS command: 
+# Point 7
+
+After adding the small perturbation to the value in position (1, 1) and saving the matrix in Matrix Market format, we run the LIS script that computes the biggest eigenvalue of a matrix with a given tolerance. After compiling the source code with the following command.
 ```
-mpirun -n 4 ./eigen1 Ls_perturbed.mtx eigvec.txt hist.txt -e pi -etol 1.e-8 -emaxiter 3000
+mpicc -DUSE_MPI -I${mkLisInc} -L${mkLisLib} -llis etest1.c -o eigen1
 ```
-whose console output is: 
+We computed the biggest eigenvalue of Ls.mtx using the power method and setting a tolerance of 1e-08:
+```
+mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e pi -etol 1e-08 -emaxiter 10000
+```
+Note that, even if it wasn't requested, the max iteration parameter was set to 10000 because the method didn't reach the stopping condition in the default 1000 iterations set by LIS.
+The output of the execution was the following:
 ```
 number of processes = 4
 matrix size = 351 x 351 (9153 nonzero entries)
@@ -24,10 +30,16 @@ eigensolver status    : normal end
 Power: mode number          = 0
 Power: eigenvalue           = 6.013370e+01
 Power: number of iterations = 2007
-Power: elapsed time         = 2.189406e-02 sec.
+Power: elapsed time         = 6.756434e-03 sec.
 Power:   preconditioner     = 0.000000e+00 sec.
 Power:     matrix creation  = 0.000000e+00 sec.
 Power:   linear solver      = 0.000000e+00 sec.
 Power: relative residual    = 9.940435e-09
-
 ```
+Computed biggest eigenvalue of Ls.mtx: `6.013370e+01`
+Number of iterations for the method: `2007`
+
+
+
+
+
