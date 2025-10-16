@@ -64,14 +64,14 @@ SparseMatrix<double> build_adjacency_matrix(const vector<MyTuple> & arr){
 void print_vector(const VectorXd &v) {
     cout << "[ ";
     for(int i = 0; i < v.size(); i++) {
-        cout << " "<< v.coeff(i) << " ";
+        cout << v.coeff(i) << endl;
     }
     cout << " ]" << endl;
 }
 
 int main(int argc, char** argv){
     using SpMat = Eigen::SparseMatrix<double>;
-    using SpVec = Eigen::VectorXd; // should change the name because is defined a dense vector
+    using SpVec = Eigen::VectorXd; // should change the name because is defined as a dense vector
     
     /*if(argc < 2){
         cerr << "Wrong command format!\n" << endl:
@@ -199,7 +199,7 @@ int main(int argc, char** argv){
 
     SimplicialLLT<SparseMatrix<double>> chols(Ls);
     cout << "Ls is SPD?: " << (chols.info() == Success ? "Yes" : "No") << endl;  
-    cout << "Ls Nonzeros entries = " << nnz << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
+    cout << "Ls Nonzeros entries = " << nnz << endl << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
 
     // ================================== REQUEST 7 =============================================
 
@@ -217,7 +217,58 @@ int main(int argc, char** argv){
         }
     }
     fclose(outLs);
+    
+    // ========================== REQUEST [8-10] IN README ======================================================
     // check README.md for LIS output.
+    
+    // ================================= REQUEST 11 ========================================================= 
+
+    SpMat mat; 
+    loadMarket(mat, "eigvecs.mtx");
+    cout << "Eigvecs dimension " << mat.rows() << "x" << mat.cols() << endl; // just to check 
+
+    SpVec vec = mat.col(1);
+    cout << "vec.size() = " << vec.size() << endl; // just to check
+
+    vector<int> positiveIndices, negativeIndices, indices;
+
+    for(int i = 0; i < vec.size(); i++) {
+        if(vec(i) > 0) positiveIndices.emplace_back(i);
+        else if(vec(i) < 0) negativeIndices.emplace_back(i);
+    }
+
+    int np = positiveIndices.size();
+    int nn = negativeIndices.size();
+
+    cout << "np = " << np << endl << "nn = " << nn << endl; // just to check
+
+    indices.reserve(positiveIndices.size() + negativeIndices.size());
+    indices.insert(indices.end(), positiveIndices.begin(), positiveIndices.end());
+    indices.insert(indices.end(), negativeIndices.begin(), negativeIndices.end());
+    
+    cout << "indices.size() = " << indices.size() << endl << endl;
+
+    // Create an empty permutation matrix of the correct size
+    PermutationMatrix<Dynamic> P(indices.size());
+
+    // Fill the permutation matrix with your new order(indices) plan
+    for (int i = 0; i < indices.size(); i++) {
+        P.indices()(i) = indices[i];
+    }
+
+    SpMat Aord = P * As * P.transpose();
+    
+    int nnzAs = 0, nnzAord = 0;
+
+    for(int i = 0; i < np; i++) {
+        for (int j = np; j < nn + np; j++) {
+            if(Aord.coeffRef(i, j) != 0) nnzAord++;
+            if(As.coeffRef(i, j) != 0) nnzAs++;
+        }
+    }
+
+    cout << "Number of nonzero entries in the non-diagonal blocks Aord = " << nnzAord << endl;
+    cout << "Number of nonzero entries in the non-diagonal blocks As = " << nnzAs << endl;
     
     return 0;
 }

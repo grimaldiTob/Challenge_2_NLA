@@ -246,8 +246,6 @@ In order to find the number of positive entries we just need a subtraction
 
 **Number of positive entries = 351 - 299 = 52**.
 
-## Point 11
-
 
 
 
