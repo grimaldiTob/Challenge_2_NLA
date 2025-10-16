@@ -221,7 +221,32 @@ Subspace:   linear solver      = 1.922718e-03 sec.
 Subspace: relative residual    = 4.512717e-12
 
 ```
-The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** (113 iterations where???)
+The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** (113 iterations where??? in row 209)
+
+## Point 10
+
+As we already know the dimension of the matrix Ls is 351x351. 
+
+The following command prints the size of a eigenvector corresponding to the second smallest eigenvalue;
+```
+cat eigvecs.mtx | grep ' 2 ' | wc -l
+```
+
+It returns 351 (as excepted).
+
+The second command prints the number of negative entries of the previous eigenvector
+
+```
+cat eigvecs.mtx | grep ' 2  -' | wc -l
+```
+
+**Number of negative entries = 299**.
+
+In order to find the number of positive entries we just need a subtraction
+
+**Number of positive entries = 351 - 299 = 52**.
+
+## Point 11
 
 
 
