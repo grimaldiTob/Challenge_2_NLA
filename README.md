@@ -167,11 +167,18 @@ Which is still worse because of course we are using the inverse power method (it
 
 ## Point 9
 
-This command runs the LIS script and finds the second smallest (positive) eigenvalue of Ls matrix with a 1.e-10 tolerance.
+Compile the file etest5.c by typing:
 
 ```
-mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e si -ss 2 -etol 1e-10
+mpicc -DUSE_MPI -I${mkLisInc} -L${mkLisLib} -llis etest5.c -o eigen2
 ```
+
+The following command runs the LIS script with the **Shift-and-Invert** method which returns the first eigenvalues near the shift (by default is zero, close to the smallest eigenvalue in our case).
+
+```
+mpirun ./eigen2 Ls.mtx evals.mtx eigvecs.mtx res.txt iters.txt -ss 2 -e si -etol 1.0e-10
+```
+
 with the following result:
 ```
 number of processes = 4
@@ -192,13 +199,13 @@ compute eigenpairs in subspace:
 
 Subspace: mode number          = 0
 Subspace: eigenvalue           = 5.669404e-04
-Subspace: elapsed time         = 2.074572e-03 sec.
+Subspace: elapsed time         = 1.996836e-03 sec.
 Subspace: number of iterations = 3
 Subspace: relative residual    = 4.512717e-12
 
 Subspace: mode number          = 1
 Subspace: eigenvalue           = 1.789070e+00
-Subspace: elapsed time         = 2.323120e-02 sec.
+Subspace: elapsed time         = 2.661525e-02 sec.
 Subspace: number of iterations = 113
 Subspace: relative residual    = 8.965722e-11
 
@@ -207,11 +214,12 @@ eigensolver status    : normal end
 Subspace: mode number          = 0
 Subspace: eigenvalue           = 5.669404e-04
 Subspace: number of iterations = 3
-Subspace: elapsed time         = 2.541831e-02 sec.
-Subspace:   preconditioner     = 1.465300e-05 sec.
-Subspace:     matrix creation  = 8.700000e-08 sec.
-Subspace:   linear solver      = 2.006257e-03 sec.
+Subspace: elapsed time         = 2.868936e-02 sec.
+Subspace:   preconditioner     = 2.136300e-05 sec.
+Subspace:     matrix creation  = 1.170000e-07 sec.
+Subspace:   linear solver      = 1.922718e-03 sec.
 Subspace: relative residual    = 4.512717e-12
+
 ```
 The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** (113 iterations where???)
 
