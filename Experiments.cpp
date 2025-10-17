@@ -227,7 +227,7 @@ int main(int argc, char** argv){
     loadMarket(mat, "eigvecs.mtx");
     cout << "Eigvecs dimension " << mat.rows() << "x" << mat.cols() << endl; // just to check 
 
-    SpVec vec = mat.col(1);
+    SpVec vec = mat.col(1); // take the eigenvector associated to the second smallest eigenvalue (Fiedler vector)
     cout << "vec.size() = " << vec.size() << endl; // just to check
 
     vector<int> positiveIndices, negativeIndices, indices;
@@ -242,6 +242,9 @@ int main(int argc, char** argv){
 
     cout << "np = " << np << endl << "nn = " << nn << endl; // just to check
 
+    /* In this part of code we create two vectors that take the indices of positive and negative 
+        values in the Fiedler vector. After populating the two vectors we form a third vector indices
+        which will have first the positive indices than the negative ones. */
     indices.reserve(positiveIndices.size() + negativeIndices.size());
     indices.insert(indices.end(), positiveIndices.begin(), positiveIndices.end());
     indices.insert(indices.end(), negativeIndices.begin(), negativeIndices.end());
@@ -249,19 +252,21 @@ int main(int argc, char** argv){
     cout << "indices.size() = " << indices.size() << endl << endl;
 
     // Create an empty permutation matrix of the correct size
-    PermutationMatrix<Dynamic> P(indices.size());
+    PermutationMatrix<Dynamic> P(indices.size()); // P has dimension 351x351 as expected
 
     // Fill the permutation matrix with your new order(indices) plan
     for (int i = 0; i < indices.size(); i++) {
         P.indices()(i) = indices[i];
     }
+    // the previous loop reorders the column of the permutation matrix according to the values stored in the indices vector
 
+    // building the matrix requested by the challenge
     SpMat Aord = P * As * P.transpose();
     
     int nnzAs = 0, nnzAord = 0;
 
     for(int i = 0; i < np; i++) {
-        for (int j = np; j < nn + np; j++) {
+        for (int j = nn; j < nn + np; j++) { // here the iteration starts from nn not np (CORRECTED)
             if(Aord.coeffRef(i, j) != 0) nnzAord++;
             if(As.coeffRef(i, j) != 0) nnzAs++;
         }

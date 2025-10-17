@@ -221,7 +221,7 @@ Subspace:   linear solver      = 1.922718e-03 sec.
 Subspace: relative residual    = 4.512717e-12
 
 ```
-The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations** (113 iterations where??? in row 209)
+The second smallest eigenvalue determined is **1.789070e+00** with **113 iterations**
 
 ## Point 10
 
@@ -232,7 +232,7 @@ The following command prints the size of a eigenvector corresponding to the seco
 cat eigvecs.mtx | grep ' 2 ' | wc -l
 ```
 
-It returns 351 (as excepted).
+It returns 351 (as expected).
 
 The second command prints the number of negative entries of the previous eigenvector
 
@@ -240,11 +240,25 @@ The second command prints the number of negative entries of the previous eigenve
 cat eigvecs.mtx | grep ' 2  -' | wc -l
 ```
 
-**Number of negative entries = 299**.
+`Number of negative entries = 299`.
 
 In order to find the number of positive entries we just need a subtraction
 
-**Number of positive entries = 351 - 299 = 52**.
+`Number of positive entries = 351 - 299 = 52`.
+
+## Point 11
+
+After constructing the Permutation matrix from the vector of indices relative to the Fiedler's vector, we first defined `Aord` as:
+```
+Aord = P * As * P.transpose()
+```
+Than we counted the numer of non-zero entries in the block of dimension np x np of both As and Aord. The values are reported:
+
+```
+Number of nonzero entries in the non-diagonal blocks Aord = 185
+Number of nonzero entries in the non-diagonal blocks As = 181
+```
+
 
 
 
