@@ -254,7 +254,7 @@ int main(int argc, char** argv){
     // Create an empty permutation matrix of the correct size
     PermutationMatrix<Dynamic> P(indices.size()); // P has dimension 351x351 as expected
 
-    // Fill the permutation matrix with your new order(indices) plan
+    // Fill the permutation matrix with new order (indices) plan
     for (int i = 0; i < indices.size(); i++) {
         P.indices()(i) = indices[i];
     }
