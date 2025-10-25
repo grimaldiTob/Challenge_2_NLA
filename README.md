@@ -7,30 +7,33 @@ Actually with the last request they ask us to comment results so I guess we shou
 
 Ag is the adjacency matrix of the graph shown in the Challenge paper. The function `build_adjacency_matrix` builds a Sparse Matrix from a vector of Tuples passed as an argument. 
 
-The Frobenius norm of the matrix Ag is: `4.69042`
+The Frobenius norm of the matrix $A_g$ is: `4.69042`
 
 ## Point 2
 
-After building the Dg and Lg matrix as requested we perform the matrix vector multiplication such that 
-```
-y = Lg * x
-```
+After building the $D_g$ and $L_g$ matrix as requested we perform the matrix vector multiplication such that
+
+$$
+    y = L_g \cdot x
+$$
+
 The Euclidean norm of y: `0`
 
 This result is obvious as we are actually taking the sum of all the terms that are on the same row in Lg, which is the Laplacian.
 
-Lg is SPD as we get it from the sum of two symmetrix matrices (`Dg - Ag`)
+Lg is SsPD as we get it from the sum of two symmetrix matrices ($D_g - A_g$). (Note that the matrix $L_g$ is semi-positive definite as it presents a 0 eigenvalue. See [point 4](#point-4) for more information.)
 
 ## Point 3
 
-Third point asks to compute the biggest and smallest eigenvalue of Lg using the `SelfAdjointEigenSolver` from Eigen.
+Third point asks to compute the biggest and smallest eigenvalue of $L_g$ using the `SelfAdjointEigenSolver` from Eigen.
 
-Minimum eigenvalue of Lg is: 0
-Maximum eigenvalue of Lg is: 5.09259
+Minimum eigenvalue of $L_g$ is: `0`
+
+Maximum eigenvalue of $L_g$ is: `5.09259`
 
 ## Point 4
 
-As it is said in the Challenge paper Lg is a graph Laplacian which has the smallest eigenvalue equal to zero.
+As it is said in the Challenge paper $L_g$ is a graph Laplacian which has the smallest eigenvalue equal to zero.
 
 The second smallest eigenvalue is called the Fiedler value. Its corresponding eigenvector carries informations about how the graph is clustered. In particular the Fiedler vector associated to the Fiedler value is the following:
 
@@ -46,12 +49,15 @@ Fiedler vector vector:
   0.37886
  0.311992
 ```
+
 We can identify two clusters by looking at the sign of the entries of the previous vector.
+
 ```
 The clusters are: 
 Cluster 1 (positive components): 5 6 7 8 9 
 Cluster 2 (negative components): 1 2 3 4 
 ```
+
 This is the result expected because looking at the graph's scheme in the Challenge's paper we clearly recognize two blocks of nodes.
 
 ## Point 5
@@ -64,21 +70,29 @@ Frobenius norm of the matrix: `93.819`
 
 Just repeat the procedure we used for point 2 to obtain the graph Laplacian of the matrix As. In this case the reported output is the following:
 
-Ls is SPD?: No
-Ls Nonzeros entries = 9153
+$L_s$ is SPD?: No
+
+$L_s$ is symmetric? : Yes
+
+$L_s$ Nonzeros entries = 9153
 
 ## Point 7
 
 After adding the small perturbation to the value in position (1, 1) and saving the matrix in Matrix Market format, we run the LIS script that computes the biggest eigenvalue of a matrix with a given tolerance. After compiling the source code with the following command.
+
 ```
 mpicc -DUSE_MPI -I${mkLisInc} -L${mkLisLib} -llis etest1.c -o eigen1
 ```
+
 We computed the biggest eigenvalue of Ls.mtx using the power method and setting a tolerance of 1e-08:
+
 ```
 mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e pi -etol 1e-08 -emaxiter 10000
 ```
+
 Note that, even if it wasn't requested, the max iteration parameter was set to 10000 because the method didn't reach the stopping condition in the default 1000 iterations set by LIS.
 The output of the execution was the following:
+
 ```
 number of processes = 4
 matrix size = 351 x 351 (9153 nonzero entries)
@@ -100,10 +114,13 @@ Power:     matrix creation  = 0.000000e+00 sec.
 Power:   linear solver      = 0.000000e+00 sec.
 Power: relative residual    = 9.940435e-09
 ```
-Computed biggest eigenvalue of Ls.mtx: `6.013370e+01`
+
+Computed biggest eigenvalue of *Ls.mtx*: `6.013370e+01`
+
 Number of iterations for the method: `2007`
 
 ## Point 8
+<<<<<<< HEAD
 A shift can be added when invoking the previous solver in order to speed up the convergence: 
 
 I made the tests taking 6.01 as a shift, which makes sense because it shifts the maximum eigenvalue closer to zero, and applying the inverse power method is less expensive in terms of iterations. 
@@ -112,6 +129,50 @@ This is the command I used:
 mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e ii -etol 1e-08 -emaxiter 10000 -shift 6.01
 ```
 And the result was this:
+=======
+A shift can be added when invoking the previous solver in order to speed up the convergence:
+
+```
+mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e pi -etol 1e-08 -emaxiter 10000 -shift 29.55
+```
+
+whose output is:
+
+```
+number of processes = 4
+matrix size = 351 x 351 (9153 nonzero entries)
+
+initial vector x      : all components set to 1
+precision             : double
+eigensolver           : Power
+convergence condition : ||lx-(B^-1)Ax||_2 <= 1.0e-08 * ||lx||_2
+matrix storage format : CSR
+shift                 : 2.955000e+01
+eigensolver status    : normal end
+
+Power: mode number          = 0
+Power: eigenvalue           = 6.013370e+01
+Power: number of iterations = 1063
+Power: elapsed time         = 1.176979e-02 sec.
+Power:   preconditioner     = 0.000000e+00 sec.
+Power:     matrix creation  = 0.000000e+00 sec.
+Power:   linear solver      = 0.000000e+00 sec.
+Power: relative residual    = 9.972897e-09
+
+```
+
+[NB: I tried various shifts, 29.55 seems to be the best in term of reducing the number of iterations without affecting too much the relative residual (and without causing a change in the computed eigenvalue!).]
+
+Ok it could be me but I guess using the shift meant that you applied the inverse power method. I made the same tests taking 6.01 as a shift, which makes sense because it shifts the maximum eigenvalue closer to zero, and applying the inverse power method is less expensive.
+Btw this is the command I used:
+
+```
+mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e ii -etol 1e-08 -emaxiter 10000 -shift 6.01
+```
+
+And the result was like this:
+
+>>>>>>> 76ac59ab463d719c50b20627b67fd02eb4554d0f
 ```
 number of processes = 4
 matrix size = 351 x 351 (9153 nonzero entries)
@@ -135,11 +196,16 @@ Inverse:     matrix creation  = 2.000000e-07 sec.
 Inverse:   linear solver      = 2.540852e-02 sec.
 Inverse: relative residual    = 5.457944e-10
 ```
+<<<<<<< HEAD
 Which is still worse because of course we are using the inverse power method (it requires to solve a linear system). Number of iterations is good but that's because of the complete different approach of the method we used. I tried other LIS scripts and this one seems the best.
+=======
+
+Which is still worse because of course we are using the inverse power method (it requires to solve a linear system). Number of iterations is good but that's because of the method we used. I tried other LIS scripts and this one seems the best. I guess if we are giving a mu as answer this seems fair.
+>>>>>>> 76ac59ab463d719c50b20627b67fd02eb4554d0f
 
 ## Point 9
 
-Compile the file etest5.c by typing:
+Compile the file *etest5.c* by typing:
 
 ```
 mpicc -DUSE_MPI -I${mkLisInc} -L${mkLisLib} -llis etest5.c -o eigen2
@@ -220,10 +286,11 @@ In order to find the number of positive entries we just need a subtraction
 
 ## Point 11
 
-After constructing the Permutation matrix from the vector of indices relative to the Fiedler's vector, we first defined `Aord` as:
-```
-Aord = P * As * P.transpose()
-```
+After constructing the Permutation matrix from the vector of indices relative to the Fiedler's vector, we first defined $A_{ord}$ as:
+
+$$
+A_{ord} = P \cdot A_s \cdot P^{T}
+$$
 Than we counted the numer of non-zero entries in the block of dimension np x np of both As and Aord. The values are reported:
 
 ```
