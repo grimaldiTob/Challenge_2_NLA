@@ -197,6 +197,10 @@ int main(int argc, char** argv){
 
     cout << "Norm of vector ys is: " << ys.norm() << endl;
 
+    SpMat Skew_Ls = SpMat(Ls.transpose()) - Ls;
+
+    cout << "Norm of skew-symmetrix part of Ls: " << Skew_Ls.norm() << endl;
+
     SimplicialLLT<SparseMatrix<double>> chols(Ls);
     cout << "Ls is SPD?: " << (chols.info() == Success ? "Yes" : "No") << endl;  
     cout << "Ls Nonzeros entries = " << nnz << endl << endl; // 351 (diagonal) + 8802 (As.nonZeros()) = 9153 (Ls.nonZeros())
