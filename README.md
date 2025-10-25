@@ -120,7 +120,6 @@ Computed biggest eigenvalue of *Ls.mtx*: `6.013370e+01`
 Number of iterations for the method: `2007`
 
 ## Point 8
-<<<<<<< HEAD
 A shift can be added when invoking the previous solver in order to speed up the convergence: 
 
 I made the tests taking 6.01 as a shift, which makes sense because it shifts the maximum eigenvalue closer to zero, and applying the inverse power method is less expensive in terms of iterations. 
@@ -129,9 +128,7 @@ This is the command I used:
 mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e ii -etol 1e-08 -emaxiter 10000 -shift 6.01
 ```
 And the result was this:
-=======
 
->>>>>>> 76ac59ab463d719c50b20627b67fd02eb4554d0f
 ```
 number of processes = 4
 matrix size = 351 x 351 (9153 nonzero entries)
@@ -155,12 +152,7 @@ Inverse:     matrix creation  = 2.000000e-07 sec.
 Inverse:   linear solver      = 2.540852e-02 sec.
 Inverse: relative residual    = 5.457944e-10
 ```
-<<<<<<< HEAD
 Which is still worse because of course we are using the inverse power method (it requires to solve a linear system). Number of iterations is good but that's because of the complete different approach of the method we used. I tried other LIS scripts and this one seems the best.
-=======
-
->>>>>>> 76ac59ab463d719c50b20627b67fd02eb4554d0f
-
 ## Point 9
 
 Compile the file *etest5.c* by typing:
