@@ -130,47 +130,6 @@ mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e ii -etol 1e-08 -emaxiter 1000
 ```
 And the result was this:
 =======
-A shift can be added when invoking the previous solver in order to speed up the convergence:
-
-```
-mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e pi -etol 1e-08 -emaxiter 10000 -shift 29.55
-```
-
-whose output is:
-
-```
-number of processes = 4
-matrix size = 351 x 351 (9153 nonzero entries)
-
-initial vector x      : all components set to 1
-precision             : double
-eigensolver           : Power
-convergence condition : ||lx-(B^-1)Ax||_2 <= 1.0e-08 * ||lx||_2
-matrix storage format : CSR
-shift                 : 2.955000e+01
-eigensolver status    : normal end
-
-Power: mode number          = 0
-Power: eigenvalue           = 6.013370e+01
-Power: number of iterations = 1063
-Power: elapsed time         = 1.176979e-02 sec.
-Power:   preconditioner     = 0.000000e+00 sec.
-Power:     matrix creation  = 0.000000e+00 sec.
-Power:   linear solver      = 0.000000e+00 sec.
-Power: relative residual    = 9.972897e-09
-
-```
-
-[NB: I tried various shifts, 29.55 seems to be the best in term of reducing the number of iterations without affecting too much the relative residual (and without causing a change in the computed eigenvalue!).]
-
-Ok it could be me but I guess using the shift meant that you applied the inverse power method. I made the same tests taking 6.01 as a shift, which makes sense because it shifts the maximum eigenvalue closer to zero, and applying the inverse power method is less expensive.
-Btw this is the command I used:
-
-```
-mpirun -n 4 ./eigen1 Ls.mtx eigvec.txt hist.txt -e ii -etol 1e-08 -emaxiter 10000 -shift 6.01
-```
-
-And the result was like this:
 
 >>>>>>> 76ac59ab463d719c50b20627b67fd02eb4554d0f
 ```
@@ -200,7 +159,6 @@ Inverse: relative residual    = 5.457944e-10
 Which is still worse because of course we are using the inverse power method (it requires to solve a linear system). Number of iterations is good but that's because of the complete different approach of the method we used. I tried other LIS scripts and this one seems the best.
 =======
 
-Which is still worse because of course we are using the inverse power method (it requires to solve a linear system). Number of iterations is good but that's because of the method we used. I tried other LIS scripts and this one seems the best. I guess if we are giving a mu as answer this seems fair.
 >>>>>>> 76ac59ab463d719c50b20627b67fd02eb4554d0f
 
 ## Point 9
